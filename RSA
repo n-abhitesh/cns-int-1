@@ -1,0 +1,61 @@
+import java.math.*; // Importing BigInteger for large number calculations
+
+class Main {
+    public static void main(String args[]) {
+        int p, q, n, z, d = 0, e, i;
+        int msg = 12; // The number to be encrypted
+        double c; // To store the encrypted message
+        BigInteger msgback; // To store the decrypted message
+        
+        // 1st prime number p
+        p = 3;
+        // 2nd prime number q
+        q = 11;
+        
+        // Calculate n (modulus for public key)
+        n = p * q; 
+        
+        // Calculate z (totient)
+        z = (p - 1) * (q - 1); 
+        System.out.println("The value of z = " + z);
+        
+        // Find e such that 1 < e < z and gcd(e, z) = 1
+        for (e = 2; e < z; e++) {
+            if (gcd(e, z) == 1) {
+                break; // Found suitable e
+            }
+        }
+        System.out.println("The value of e = " + e);
+        
+        // Calculate d such that d * e ≡ 1 (mod z)
+        for (i = 0; i <= 9; i++) {
+            int x = 1 + (i * z);
+            if (x % e == 0) {
+                d = x / e; // Calculate d
+                break;
+            }
+        }
+        System.out.println("The value of d = " + d);
+        
+        // Encrypt the message
+        c = (Math.pow(msg, e)) % n;
+        System.out.println("Encrypted message is : " + c);
+        
+        // Convert int value of n to BigInteger
+        BigInteger N = BigInteger.valueOf(n);
+        // Convert double value of c to BigInteger
+        BigInteger C = BigDecimal.valueOf(c).toBigInteger();
+        
+        // Decrypt the message
+        msgback = (C.pow(d)).mod(N);
+        System.out.println("Decrypted message is : " + msgback);
+    }
+
+    // Function to compute gcd
+    static int gcd(int e, int z) {
+        if (e == 0)
+            return z;
+        else
+            return gcd(z % e, e);
+    }
+}

@@ -1,0 +1,145 @@
+import java.util.Scanner;
+
+public class Main {
+
+    public static int[] matrixMultiplication(int[][] matrix, int[] block) {
+        int[] result = new int[block.length];
+        for (int i = 0; i < matrix.length; i++) {
+            result[i] = 0;
+            for (int j = 0; j < block.length; j++) {
+                result[i] += matrix[i][j] * block[j];
+            }
+            result[i] = result[i] % 26; // Modulo 26 to keep it within alphabet range
+            if (result[i] < 0) result[i] += 26; // To handle negative mod results
+        }
+        return result;
+    }
+
+    // Method to encrypt a block using the key matrix
+    public static String encrypt(String plaintext, int[][] keyMatrix) {
+        int blockSize = keyMatrix.length;
+        int[] block = new int[blockSize];
+        StringBuilder ciphertext = new StringBuilder();
+        
+        // Encrypting plaintext block by block, ignoring spaces
+        for (int i = 0; i < plaintext.length(); i += blockSize) {
+            for (int j = 0; j < blockSize; j++) {
+                if (i + j < plaintext.length() && plaintext.charAt(i + j) != ' ') {
+                    block[j] = plaintext.charAt(i + j) - 'a'; // Convert char to integer (0-25)
+                } else {
+                    block[j] = 'x' - 'a'; // Padding with 'x' if the last block is incomplete or space
+                }
+            }
+            int[] encryptedBlock = matrixMultiplication(keyMatrix, block);
+            for (int val : encryptedBlock) {
+                ciphertext.append((char) (val + 'a')); // Convert back to character
+            }
+        }
+        return ciphertext.toString();
+    }
+
+    // Method to compute the determinant of a 2x2 matrix mod 26
+    public static int determinantMod26(int[][] matrix) {
+        int det = (matrix[0][0] * matrix[1][1]) - (matrix[0][1] * matrix[1][0]);
+        det = det % 26;
+        if (det < 0) {
+            det += 26; // Make sure the determinant is positive
+        }
+        return det;
+    }
+
+    // Method to find the modular inverse of a number mod 26
+    public static int modInverse(int det, int mod) {
+        det = det % mod;
+        for (int x = 1; x < mod; x++) {
+            if ((det * x) % mod == 1) {
+                return x;
+            }
+        }
+        return -1; 
+    }
+
+    // Method to find the inverse of a 2x2 matrix mod 26
+    public static int[][] inverseMatrixMod26(int[][] matrix) {
+        int det = determinantMod26(matrix);
+        int detInv = modInverse(det, 26);
+        if (detInv == -1) {
+            throw new IllegalArgumentException("Matrix is not invertible mod 26");
+        }
+
+        // Adjugate (cofactor transpose) for 2x2 matrix
+        int[][] adjugateMatrix = new int[2][2];
+        adjugateMatrix[0][0] = matrix[1][1] * detInv % 26;
+        adjugateMatrix[0][1] = -matrix[0][1] * detInv % 26;
+        adjugateMatrix[1][0] = -matrix[1][0] * detInv % 26;
+        adjugateMatrix[1][1] = matrix[0][0] * detInv % 26;
+
+        // Normalize the adjugate matrix mod 26
+        for (int i = 0; i < 2; i++) {
+            for (int j = 0; j < 2; j++) {
+                adjugateMatrix[i][j] = (adjugateMatrix[i][j] % 26 + 26) % 26; // Ensure positive
+            }
+        }
+        return adjugateMatrix;
+    }
+
+    // Method to decrypt a block using the inverse matrix
+    public static String decrypt(String ciphertext, int[][] inverseKeyMatrix, String originalText) {
+        int blockSize = inverseKeyMatrix.length;
+        int[] block = new int[blockSize];
+        StringBuilder plaintext = new StringBuilder();
+        
+        int originalIndex = 0;
+        
+        // Decrypting ciphertext block by block, adding spaces where necessary
+        for (int i = 0; i < ciphertext.length(); i += blockSize) {
+            for (int j = 0; j < blockSize; j++) {
+                if (i + j < ciphertext.length()) {
+                    block[j] = ciphertext.charAt(i + j) - 'a'; // Convert char to integer (0-25)
+                }
+            }
+            int[] decryptedBlock = matrixMultiplication(inverseKeyMatrix, block);
+            for (int val : decryptedBlock) {
+                // Add space in the original positions
+                while (originalIndex < originalText.length() && originalText.charAt(originalIndex) == ' ') {
+                    plaintext.append(' ');
+                    originalIndex++;
+                }
+                plaintext.append((char) (val + 'a')); // Convert back to character
+                originalIndex++;
+            }
+        }
+        // Add remaining spaces if any at the end
+        while (originalIndex < originalText.length()) {
+            if (originalText.charAt(originalIndex) == ' ') {
+                plaintext.append(' ');
+            }
+            originalIndex++;
+        }
+        return plaintext.toString();
+    }
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        
+        // Example 2x2 key matrix (must be invertible mod 26)
+        int[][] keyMatrix = { {3, 3}, {2, 5} };
+        
+        // Compute inverse matrix
+        int[][] inverseKeyMatrix = inverseMatrixMod26(keyMatrix);
+        
+        // Input plaintext 
+        System.out.print("Enter the plaintext (lowercase letters): ");
+        String plaintext = scanner.nextLine().toLowerCase();
+        
+        // Encrypting (spaces will be ignored)
+        String ciphertext = encrypt(plaintext.replaceAll(" ", ""), keyMatrix);
+        System.out.println("Encrypted text: " + ciphertext);
+        
+        // Decrypting (spaces will be added back)
+        String decryptedText = decrypt(ciphertext, inverseKeyMatrix, plaintext);
+        System.out.println("Decrypted text: " + decryptedText);
+        
+        scanner.close();
+    }
+}

@@ -1,0 +1,32 @@
+public class Main {
+
+    public static String encrypt(String plaintext, int shift) {
+        StringBuilder ciphertext = new StringBuilder();
+
+        for (char character : plaintext.toCharArray()) {
+            if (Character.isLetter(character)) {
+                char base = Character.isUpperCase(character) ? 'A' : 'a';
+                char encryptedChar = (char) ((character - base + shift) % 26 + base);
+                ciphertext.append(encryptedChar);
+            } else {
+                ciphertext.append(character);
+            }
+        }
+        return ciphertext.toString();
+    }
+
+    public static String decrypt(String ciphertext, int shift) {
+        return encrypt(ciphertext, 26 - shift); 
+    }
+
+    public static void main(String[] args) {
+        String plaintext = "HELLO WORLD";
+        int shift = 3;
+
+        String encrypted = encrypt(plaintext, shift);
+        System.out.println("Encrypted: " + encrypted);
+
+        String decrypted = decrypt(encrypted, shift);
+        System.out.println("Decrypted: " + decrypted);
+    }
+}

@@ -1,0 +1,64 @@
+import java.util.HashMap;
+import java.util.Map;
+
+public class Main {
+
+    private static Map<Character, Character> createCipherMap(String key) {
+        Map<Character, Character> cipherMap = new HashMap<>();
+        char[] alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray();
+        key = key.toUpperCase();
+
+        for (int i = 0; i < alphabet.length; i++) {
+            cipherMap.put(alphabet[i], key.charAt(i));
+        }
+        return cipherMap;
+    }
+
+    public static String encrypt(String plaintext, String key) {
+        Map<Character, Character> cipherMap = createCipherMap(key);
+        StringBuilder ciphertext = new StringBuilder();
+
+        for (char character : plaintext.toCharArray()) {
+            if (Character.isLetter(character)) {
+                char base = Character.isUpperCase(character) ? 'A' : 'a';
+                char encryptedChar = Character.toUpperCase(cipherMap.get(Character.toUpperCase(character)));
+                ciphertext.append(Character.isLowerCase(character) ? Character.toLowerCase(encryptedChar) : encryptedChar);
+            } else {
+                ciphertext.append(character); 
+            }
+        }
+        return ciphertext.toString();
+    }
+
+    public static String decrypt(String ciphertext, String key) {
+        Map<Character, Character> cipherMap = createCipherMap(key);
+        StringBuilder plaintext = new StringBuilder();
+        Map<Character, Character> reverseMap = new HashMap<>();
+
+        for (Map.Entry<Character, Character> entry : cipherMap.entrySet()) {
+            reverseMap.put(entry.getValue(), entry.getKey());
+        }
+
+        for (char character : ciphertext.toCharArray()) {
+            if (Character.isLetter(character)) {
+                char base = Character.isUpperCase(character) ? 'A' : 'a';
+                char decryptedChar = reverseMap.get(Character.toUpperCase(character));
+                plaintext.append(Character.isLowerCase(character) ? Character.toLowerCase(decryptedChar) : decryptedChar);
+            } else {
+                plaintext.append(character);
+            }
+        }
+        return plaintext.toString();
+    }
+
+    public static void main(String[] args) {
+        String plaintext = "HELLO WORLD";
+        String key = "QWERTYUIOPASDFGHJKLZXCVBNM"; 
+
+        String encrypted = encrypt(plaintext, key);
+        System.out.println("Encrypted: " + encrypted);
+
+        String decrypted = decrypt(encrypted, key);
+        System.out.println("Decrypted: " + decrypted);
+    }
+}
