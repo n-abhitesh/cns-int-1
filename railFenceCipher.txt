@@ -1,0 +1,76 @@
+import java.util.Scanner;
+public class RailFenceCipher {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Enter the plaintext: ");
+        String plaintext = scanner.nextLine();
+        System.out.print("Enter the number of rails: ");
+        int rails = scanner.nextInt();
+        scanner.nextLine();  // Consume newline
+        String encrypted = encrypt(plaintext, rails);
+        System.out.println("Encrypted Text: " + encrypted);
+        String decrypted = decrypt(encrypted, rails);
+        System.out.println("Decrypted Text: " + decrypted);
+        scanner.close();
+    }
+
+    public static String encrypt(String text, int rails) {
+        if (rails <= 1) return text;
+        StringBuilder[] railArray = new StringBuilder[rails];
+        for (int i = 0; i < rails; i++) {
+            railArray[i] = new StringBuilder();
+        }
+        int currentRail = 0;
+        boolean goingDown = true;
+        for (char c : text.toCharArray()) {
+            railArray[currentRail].append(c);
+            if (currentRail == 0) {
+                goingDown = true;
+            } else if (currentRail == rails - 1) {
+                goingDown = false;
+            }
+            currentRail += goingDown ? 1 : -1;
+        }
+        StringBuilder encrypted = new StringBuilder();
+        for (StringBuilder rail : railArray) {
+            encrypted.append(rail);
+        }
+        return encrypted.toString();
+    }
+    public static String decrypt(String text, int rails) {
+        if (rails <= 1) return text;
+        char[][] railArray = new char[rails][text.length()];
+        int currentRail = 0;
+        boolean goingDown = true;
+        for (int i = 0; i < text.length(); i++) {
+            railArray[currentRail][i] = '*';
+            if (currentRail == 0) {
+                goingDown = true;
+            } else if (currentRail == rails - 1) {
+                goingDown = false;
+            }
+            currentRail += goingDown ? 1 : -1;
+        }
+        int index = 0;
+        for (int r = 0; r < rails; r++) {
+            for (int c = 0; c < text.length(); c++) {
+                if (railArray[r][c] == '*' && index < text.length()) {
+                    railArray[r][c] = text.charAt(index++);
+                }
+            }
+        }
+        StringBuilder decrypted = new StringBuilder();
+        currentRail = 0;
+        goingDown = true;
+        for (int i = 0; i < text.length(); i++) {
+            decrypted.append(railArray[currentRail][i]);
+            if (currentRail == 0) {
+                goingDown = true;
+            } else if (currentRail == rails - 1) {
+                goingDown = false;
+            }
+            currentRail += goingDown ? 1 : -1;
+        }
+        return decrypted.toString();
+    }
+}

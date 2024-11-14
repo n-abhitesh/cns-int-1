@@ -1,0 +1,82 @@
+// Euclidean Algorithm
+import java.util.Scanner;
+public class EuclideanAlgorithms {    
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);        
+        System.out.print("Enter first number (a): ");
+        int a = scanner.nextInt();        
+        System.out.print("Enter second number (b): ");
+        int b = scanner.nextInt();        
+        System.out.println("\nEuclidean Algorithm:");
+        int gcd = euclideanGCD(a, b);
+        System.out.println("GCD of " + a + " and " + b + " is: " + gcd);        
+        System.out.println("\nExtended Euclidean Algorithm:");
+        int[] result = extendedEuclidean(a, b);
+        System.out.println("GCD of " + a + " and " + b + " is: " + result[0]);
+        System.out.println("Coefficients x and y are: " + result[1] + " and " + result[2]);
+        scanner.close();
+    }    
+    public static int euclideanGCD(int a, int b) {
+        while (b != 0) {
+            int remainder = a % b;
+            a = b;
+            b = remainder;
+        }
+        return a;
+    }    
+    public static int[] extendedEuclidean(int a, int b) {
+        int x0 = 1, x1 = 0;
+        int y0 = 0, y1 = 1;
+        
+        while (b != 0) {
+            int q = a / b; // quotient
+            int remainder = a % b;
+            a = b;
+            b = remainder;
+            int newX = x0 - q * x1;
+            int newY = y0 - q * y1;
+            x0 = x1;
+            x1 = newX;
+            y0 = y1;
+            y1 = newY;
+        }    
+        return new int[] { a, x0, y0 };
+    }
+}
+
+
+
+
+// Advanced Euclidean Algorithm
+import java.lang.*;
+import java.util.*;
+
+class Main {
+    public static int gcdExtended(int a, int b, int x,
+                                  int y)
+    {
+        if (a == 0) {
+            x = 0;
+            y = 1;
+            return b;
+        }
+
+        int x1 = 1,
+            y1 = 1;
+        int gcd = gcdExtended(b % a, a, x1, y1);
+
+        x = y1 - (b / a) * x1;
+        y = x1;
+
+        return gcd;
+    }
+
+    public static void main(String[] args)
+    {
+        int x = 1, y = 1;
+        int a = 35, b = 15;
+        int g = gcdExtended(a, b, x, y);
+        System.out.print("gcd(" + a + " , " + b
+                         + ") = " + g);
+    }
+}

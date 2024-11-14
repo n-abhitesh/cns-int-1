@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Diffie-Hellman Key Exchange</title>
+</head>
+<body>
+    <h1>Diffie-Hellman Key Exchange</h1>
+    <div>
+        <h3>Public Parameters</h3>
+        <label for="prime">Prime Number (p): </label>
+        <input type="number" id="prime" placeholder="Enter a large prime number" required><br>
+         <label for="base">Base (g): </label>
+        <input type="number" id="base" placeholder="Enter a base number" required><br>  
+        <button onclick="generateKeys()">Generate Keys</button>
+    </div>
+    <div id="user-a-section" style="margin-top: 20px;">
+        <h3>User A's Keys</h3>
+        <label for="user-a-private">User A's Private Key (a): </label>
+        <input type="number" id="user-a-private" placeholder="Enter User A's private key"><br>
+        <button onclick="computeUserAPublic()">Compute User A's Public Key</button><br>
+        <label>User A's Public Key (A): </label>
+        <span id="user-a-public"></span><br>
+    </div>
+    <div id="user-b-section" style="margin-top: 20px;">
+        <h3>User B's Keys</h3>
+        <label for="user-b-private">User B's Private Key (b): </label>
+        <input type="number" id="user-b-private" placeholder="Enter User B's private key"><br>        
+        <button onclick="computeUserBPublic()">Compute User B's Public Key</button><br>
+        <label>User B's Public Key (B): </label>
+        <span id="user-b-public"></span><br>
+    </div>
+    <div id="shared-key-section" style="margin-top: 20px;">
+        <h3>Shared Secret Key</h3>
+        <button onclick="computeSharedKey()">Compute Shared Key</button><br>
+        <label>Shared Secret Key: </label>
+        <span id="shared-key"></span>
+    </div>
+    <script>
+        let prime, base;
+        let userAPrivate, userAPublic, userBPrivate, userBPublic;
+        function generateKeys() {
+            prime = parseInt(document.getElementById("prime").value);
+            base = parseInt(document.getElementById("base").value);
+            if (isNaN(prime) || isNaN(base) || prime <= 1 || base <= 1) {
+                alert("Please enter valid prime and base numbers.");
+                return;
+            }           
+            alert(`Public parameters set! Prime (p): ${prime}, Base (g): ${base}`);
+        }
+
+        function computeUserAPublic() {
+            userAPrivate = parseInt(document.getElementById("user-a-private").value);
+            if (isNaN(userAPrivate) || userAPrivate <= 0) {
+                alert("Please enter a valid private key for User A.");
+                return;
+            }
+            userAPublic = Math.pow(base, userAPrivate) % prime;
+            document.getElementById("user-a-public").innerText = userAPublic;
+        }
+
+        function computeUserBPublic() {
+            userBPrivate = parseInt(document.getElementById("user-b-private").value);
+            if (isNaN(userBPrivate) || userBPrivate <= 0) {
+                alert("Please enter a valid private key for User B.");
+                return;
+            }
+            userBPublic = Math.pow(base, userBPrivate) % prime;
+            document.getElementById("user-b-public").innerText = userBPublic;
+        }
+
+        function computeSharedKey() {
+            if (!userAPublic || !userBPublic) {
+                alert("Both User A and User B need to compute their public keys first.");
+                return;
+            } 
+            const userASharedKey = Math.pow(userBPublic, userAPrivate) % prime;
+            const userBSharedKey = Math.pow(userAPublic, userBPrivate) % prime;            
+            if (userASharedKey === userBSharedKey) {
+                document.getElementById("shared-key").innerText = userASharedKey;
+                alert("Shared secret key computed successfully!");
+            } else {
+                alert("Error: The shared keys do not match.");
+            }
+        }
+    </script>
+</body>
+</html>
